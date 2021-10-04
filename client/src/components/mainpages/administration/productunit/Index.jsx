@@ -1,0 +1,127 @@
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import DeleteIcon from '@material-ui/icons/Delete';
+import SaveIcon from '@material-ui/icons/Save';
+import axios from 'axios';
+import React, { useContext, useState } from 'react';
+import swal from 'sweetalert';
+import { GlobalState } from '../../../GlobalState';
+
+function Index() {
+    const state = useContext(GlobalState);
+    const [token] = state.token;
+    const [productunit,setProductunit] = useState('');
+    const [productunits] = state.productunitAPI.productunits;
+    const [callback, setCallback] = state.productunitAPI.callback;
+
+    const createProductunit = async (e) => {
+      e.preventDefault();
+      try{
+        const res = await axios.post('/api/administration/productunit', {unitname: productunit}, {
+            headers: {Authorization: token}
+        });
+        // swal(res.data.msg);
+        swal(res.data.msg+'!','', "success");
+        setProductunit('');
+        setCallback(!callback);
+      }catch(err){
+        // swal(err.response.data.msg, "success");
+        swal(err.response.data.msg, '', "warning");
+      }
+    }
+
+    
+    return (
+      <div className="row">
+        <div className="col-lg-12" style={{ marginBottom: "-20px" }}>
+          <div className="card">
+            <div className="card-header">
+              <h5>Add Product Unit</h5>
+            </div>
+            <div className="card-block">
+              <form autoComplete="off" onSubmit={createProductunit}>
+                <div className="row">
+                  <div className="col-sm-4">
+                    <TextField
+                      style={{ width: "100%" }}
+                      id="outlined-basic"
+                      label="Product unit"
+                      variant="outlined"
+                      size="small"
+                      name="productunit"
+                      value={productunit}
+                      onChange={e => setProductunit(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-sm-3">
+                    <Button
+                      style={{ width: "100%" }}
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      startIcon={<SaveIcon />}
+                    >
+                      ADD PRODUCT UNIT
+                    </Button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div className="col-sm-12">
+          <div className="card">
+            <div className="card-header">
+              <h5>Product Unit List</h5>
+            </div>
+            <div className="card-block">
+              <div className="dt-responsive table-responsive">
+                <table
+                  id="simpletable"
+                  className="table table-striped table-bordered nowrap"
+                >
+                  <thead>
+                    <tr>
+                      <th>Product Unit</th>
+                      <th>Status</th>
+                      <th>Created Time</th>
+                      <th>Updated Time</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productunits.map((productunit, i) => {
+                      return (
+                        <tr key={i}>
+                          <td>{productunit["unitname"]}</td>
+                          <td>
+                            {productunit["status"] === 1 ? (
+                              <label className="label label-success">Active</label>
+                            ) : (
+                              <label className="label label-danger">Inactive</label>
+                            )}
+                          </td>
+                          <td>{productunit["createdAt"]}</td>
+                          <td>{productunit["updatedAt"]}</td>
+                          <td>
+                            <DeleteIcon
+                              style={{ color: "red", cursor: "pointer" }}
+                              onClick={() => {
+                                return swal("okkkk");
+                              }}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+}
+
+export default Index
